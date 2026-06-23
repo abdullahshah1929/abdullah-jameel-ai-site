@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Abdullah Jameel AI — AI receptionist that answers every chat & call</title>
+<meta name="description" content="Abdullah Jameel AI builds AI chatbots and voice agents that answer customers, pick up the phone, and book appointments straight into your calendar — live in days." />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23FF6B5B' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 52 L30 12'/%3E%3Cpath d='M30 12 L44 44 Q45.5 54 36 54 Q28 54 28 47'/%3E%3Cpath d='M21 33 L37 33'/%3E%3C/g%3E%3Ccircle cx='49' cy='15' r='4' fill='%23E11D74'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;450;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+:root{
+  --bg:#08080F; --bg2:#0D0D1A; --text:#EDEDF4; --muted:#9A9AB4;
+  --glass:rgba(255,255,255,.045); --glass-strong:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.09); --border-strong:rgba(255,255,255,.16);
+  --c1:#FF6B5B; --c2:#E11D74; --c3:#8B5CF6;
+  --accent:#FF5C8A;
+  --grad:linear-gradient(135deg,var(--c1) 0%,var(--c2) 52%,var(--c3) 100%);
+  --grad-soft:linear-gradient(135deg,rgba(255,107,91,.18),rgba(139,92,246,.18));
+  --glow:0 0 0 1px var(--border), 0 30px 80px -30px rgba(225,29,116,.35);
+  --display:"Bricolage Grotesque", serif;
+  --body:"Inter", system-ui, sans-serif;
+  --mono:"Space Mono", ui-monospace, monospace;
+  --maxw:1200px;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+html[data-theme="light"]{
+  --bg:#F4F4F8; --bg2:#ECECF3; --text:#15151F; --muted:#5C5C72;
+  --glass:rgba(255,255,255,.7); --glass-strong:rgba(255,255,255,.92);
+  --border:rgba(20,20,40,.10); --border-strong:rgba(20,20,40,.18);
+  --accent:#E11D74;
+  --glow:0 0 0 1px var(--border), 0 30px 70px -34px rgba(225,29,116,.30);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;position:relative;
+  transition:background .5s var(--ease),color .5s var(--ease);
+}
+/* ambient gradient field */
+.field{position:fixed;inset:-20% -10% -10% -10%;z-index:0;pointer-events:none;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;will-change:transform}
+.blob.b1{width:48vw;height:48vw;background:radial-gradient(circle,var(--c1),transparent 65%);top:-8%;left:-6%}
+.blob.b2{width:42vw;height:42vw;background:radial-gradient(circle,var(--c3),transparent 65%);top:30%;right:-10%}
+.blob.b3{width:40vw;height:40vw;background:radial-gradient(circle,var(--c2),transparent 65%);bottom:-12%;left:25%}
+html[data-theme="light"] .blob{opacity:.28}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(rgba(255,255,255,.025) 1px,transparent 1px);background-size:3px 3px;mix-blend-mode:overlay}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 26px;position:relative;z-index:2}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.04;letter-spacing:-.025em}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase}
+.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+.section-no{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--accent)}
+
+/* progress bar */
+#progress{position:fixed;top:0;left:0;height:3px;width:100%;transform:scaleX(0);transform-origin:0 50%;background:var(--grad);z-index:120}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:15px;padding:13px 24px;border-radius:14px;border:1px solid transparent;cursor:pointer;transition:transform .2s var(--ease),box-shadow .25s,filter .2s,border-color .25s,background .25s;position:relative}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 12px 34px -12px rgba(225,29,116,.6)}
+.btn-primary:hover{filter:brightness(1.08);transform:translateY(-2px)}
+.btn-ghost{background:var(--glass);color:var(--text);border-color:var(--border);backdrop-filter:blur(10px)}
+.btn-ghost:hover{border-color:var(--accent);transform:translateY(-2px)}
+
+/* glass card base */
+.glass{background:var(--glass);border:1px solid var(--border);border-radius:22px;backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%)}
+
+/* NAV */
+header.nav{position:sticky;top:0;z-index:100;backdrop-filter:blur(18px) saturate(160%);background:color-mix(in srgb,var(--bg) 62%,transparent);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;gap:24px;height:72px}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--display);font-weight:700;font-size:18.5px}
+.brand svg{width:32px;height:32px;flex:none}
+.nav-links{display:flex;gap:28px;margin-left:auto;font-size:14.5px;color:var(--muted);font-weight:500}
+.nav-links a{position:relative;transition:color .2s}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;background:var(--grad);transition:width .25s var(--ease)}
+.nav-links a:hover{color:var(--text)}.nav-links a:hover::after{width:100%}
+.nav-tools{display:flex;align-items:center;gap:11px}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text);cursor:pointer;transition:border-color .2s,color .2s,transform .2s}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+@media(max-width:920px){.nav-links{display:none}}
+
+/* HERO */
+.hero{padding:90px 0 70px;position:relative}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center}
+.hero .eyebrow{display:inline-block;margin-bottom:22px;color:var(--accent)}
+.trust{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.avatars{display:flex}
+.avatars span{width:36px;height:36px;border-radius:50%;border:2px solid var(--bg);margin-left:-11px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;font-family:var(--mono)}
+.avatars span:first-child{margin-left:0}
+.trust small{font-size:13.5px;color:var(--muted)}
+.hero h1{font-size:clamp(36px,5.2vw,62px);font-weight:800;margin-bottom:22px;letter-spacing:-.03em}
+.hero .sub{font-size:clamp(16px,1.6vw,18.5px);color:var(--muted);max-width:54ch;margin-bottom:30px}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{font-size:13px;background:var(--glass);border:1px solid var(--border);padding:9px 15px;border-radius:999px;display:inline-flex;gap:8px;align-items:center;backdrop-filter:blur(8px)}
+.chip svg{width:14px;height:14px;color:var(--accent)}
+
+/* 3D hero stage */
+.stage{perspective:1400px;position:relative;min-height:480px}
+.deck{position:relative;transform-style:preserve-3d;transform:rotateY(-16deg) rotateX(9deg);transition:transform .25s var(--ease);will-change:transform}
+.console{padding:18px;border-radius:26px;box-shadow:var(--glow);transform:translateZ(0)}
+.console .bar{display:flex;align-items:center;gap:7px;padding:4px 4px 14px}
+.console .bar i{width:11px;height:11px;border-radius:50%;background:var(--border-strong)}
+.console .bar i:first-child{background:var(--c1)}
+.scr{background:color-mix(in srgb,var(--bg2) 80%,transparent);border:1px solid var(--border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:11px}
+.msg{max-width:84%;padding:11px 14px;border-radius:15px;font-size:13.5px;line-height:1.5}
+.msg.bot{align-self:flex-start;background:var(--glass-strong);border:1px solid var(--border);border-bottom-left-radius:5px}
+.msg.me{align-self:flex-end;background:var(--grad);color:#fff;border-bottom-right-radius:5px}
+.bookrow{display:flex;align-items:center;gap:10px;margin-top:4px;padding:11px 13px;border-radius:13px;background:var(--glass-strong);border:1px solid var(--border);font-size:13px}
+.bookrow .tick{width:22px;height:22px;border-radius:50%;background:var(--grad);display:grid;place-items:center;flex:none}
+.bookrow .tick svg{width:12px;height:12px;color:#fff}
+/* floating satellites */
+.sat{position:absolute;backdrop-filter:blur(10px);background:var(--glass-strong);border:1px solid var(--border);border-radius:16px;padding:12px 14px;font-size:12.5px;display:flex;align-items:center;gap:9px;box-shadow:0 20px 50px -24px rgba(0,0,0,.6);will-change:transform}
+.sat .ic{width:30px;height:30px;border-radius:9px;background:var(--grad-soft);display:grid;place-items:center;color:var(--accent);flex:none}
+.sat .ic svg{width:16px;height:16px}
+.sat.s1{top:-26px;right:30px;transform:translateZ(80px)}
+.sat.s2{bottom:34px;left:-34px;transform:translateZ(120px)}
+.sat.s3{bottom:-26px;right:-18px;transform:translateZ(60px)}
+@media(max-width:920px){.hero-grid{grid-template-columns:1fr;gap:60px}.deck{transform:rotateY(-9deg) rotateX(6deg)}.sat.s2{left:-12px}.sat.s3{right:0}}
+
+/* marquee */
+.marquee{margin-top:60px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:18px 0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.mtrack{display:flex;width:max-content;animation:scroll 40s linear infinite;font-family:var(--mono);font-size:14px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.mtrack span{display:inline-flex;align-items:center}
+.mtrack em{font-style:normal;display:inline-flex;align-items:center;white-space:nowrap}
+.mtrack em::after{content:"·";color:var(--accent);margin:0 24px;font-size:20px;line-height:1}
+@keyframes scroll{to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.mtrack{animation:none}}
+
+/* sections */
+section.block{padding:96px 0;position:relative}
+.sec-head{margin-bottom:52px;max-width:760px}
+.sec-head .row{display:flex;align-items:baseline;gap:16px;margin-bottom:16px}
+.sec-head h2{font-size:clamp(28px,3.6vw,46px)}
+.sec-head p{color:var(--muted);font-size:17px}
+
+/* DEMO */
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.panel{border-radius:22px;overflow:hidden;display:flex;flex-direction:column;min-height:580px;box-shadow:var(--glow)}
+.panel-foot{font-family:var(--mono);font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;padding:15px 18px;border-top:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+@keyframes chatFlash{0%{box-shadow:var(--glow)}12%{box-shadow:0 0 0 3px var(--accent),0 0 60px -6px var(--accent),var(--glow)}100%{box-shadow:var(--glow)}}
+.panel.flash{animation:chatFlash 1.6s var(--ease)}
+@media (prefers-reduced-motion:reduce){.panel.flash{animation:none}}
+.chat-host{flex:1;min-height:500px}
+.chat-fallback{flex:1;display:flex;flex-direction:column;gap:13px;padding:22px;overflow-y:auto}
+.bubble{max-width:82%;padding:12px 16px;border-radius:16px;font-size:14.5px;line-height:1.5}
+.bubble.bot{background:var(--glass-strong);border:1px solid var(--border);border-bottom-left-radius:5px;align-self:flex-start}
+.bubble.me{background:var(--grad);color:#fff;border-bottom-right-radius:5px;align-self:flex-end}
+.chat-input{margin-top:auto;display:flex;gap:8px;padding-top:8px}
+.chat-input input{flex:1;border:1px solid var(--border);background:var(--glass);color:var(--text);border-radius:999px;padding:12px 16px;font-family:var(--body);font-size:14px}
+.cal-host{flex:1;min-height:500px;position:relative}
+.cal-host iframe{width:100%;height:100%;border:0}
+html[data-theme="dark"] .cal-host iframe{filter:invert(.92) hue-rotate(180deg) contrast(.9)}
+@media(max-width:880px){.demo-grid{grid-template-columns:1fr}.panel{min-height:500px}}
+
+/* feature cards (tilt) */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;perspective:1300px}
+.card{border-radius:20px;padding:28px;transition:transform .25s var(--ease),box-shadow .25s,border-color .25s;transform-style:preserve-3d;will-change:transform}
+.card:hover{box-shadow:var(--glow);border-color:var(--border-strong)}
+.card .tag{font-family:var(--mono);font-size:12px;color:var(--accent);letter-spacing:.08em}
+.card h3{font-size:19px;margin:14px 0 9px}
+.card p{color:var(--muted);font-size:15px;transform:translateZ(20px)}
+/* directional 3D entrance — re-runs on scroll */
+.rv{opacity:0;transition:opacity 1.5s var(--ease),transform 1.65s var(--ease);will-change:transform,opacity}
+.rv-left{transform:translateX(-110px) rotateY(26deg) translateZ(-60px)}
+.rv-right{transform:translateX(110px) rotateY(-26deg) translateZ(-60px)}
+.rv-up{transform:translateY(80px) scale(.9)}
+.rv.in{opacity:1;transform:none}
+.rv[data-delay="1"]{transition-delay:.26s}
+.rv[data-delay="2"]{transition-delay:.5s}
+.rv[data-delay="3"]{transition-delay:.74s}
+@media(max-width:880px){.cards{grid-template-columns:1fr}.rv-left,.rv-right{transform:translateY(70px) rotateX(14deg)}}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;counter-reset:s;perspective:1300px}
+.step{border-radius:20px;padding:26px;position:relative;transform-style:preserve-3d}
+.step .n{width:50px;height:50px;border-radius:15px;background:var(--grad);color:#fff;font-family:var(--mono);font-size:18px;display:grid;place-items:center;margin-bottom:18px;box-shadow:0 14px 30px -12px rgba(225,29,116,.6);transform:translateZ(30px)}
+.step h3{font-size:17px;margin-bottom:8px}
+.step p{color:var(--muted);font-size:14.5px}
+@media(max-width:880px){.steps{grid-template-columns:1fr}}
+
+/* channels */
+.channels{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;perspective:1300px}
+.channel{border-radius:20px;padding:26px;transition:transform .25s var(--ease),box-shadow .25s;transform-style:preserve-3d}
+.channel:hover{box-shadow:var(--glow)}
+.channel .ic{width:48px;height:48px;border-radius:14px;background:var(--grad-soft);display:grid;place-items:center;color:var(--accent);margin-bottom:16px;transform:translateZ(26px)}
+.channel .ic svg{width:23px;height:23px}
+.channel h3{font-size:17px;margin-bottom:7px}
+.channel p{color:var(--muted);font-size:14.5px}
+@media(max-width:880px){.channels{grid-template-columns:1fr 1fr}}
+@media(max-width:540px){.channels{grid-template-columns:1fr}}
+
+/* packages */
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:center;perspective:1300px}
+.tier{border-radius:22px;padding:32px;transition:transform 1.65s var(--ease),box-shadow .3s,border-color .3s}
+.tier.featured{box-shadow:var(--glow);border-color:var(--accent)}
+.tier.featured.rv.in{transform:scale(1.05)}
+.tier.featured::before{content:"Most popular";display:inline-block;margin-bottom:14px;background:var(--grad);color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:5px 13px;border-radius:999px;text-transform:uppercase}
+.tier h3{font-size:23px;margin-bottom:6px}
+.tier .price{font-family:var(--display);font-size:16.5px;margin-bottom:20px;font-weight:600}
+.tier .price span{background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.tier ul{list-style:none;margin-bottom:26px}
+.tier li{padding:10px 0;border-top:1px solid var(--border);font-size:14.5px;color:var(--muted);display:flex;gap:10px}
+.tier li svg{width:16px;height:16px;color:var(--accent);flex:none;margin-top:3px}
+.tier .btn{width:100%;justify-content:center}
+@media(max-width:880px){.tiers{grid-template-columns:1fr}.tier.featured.rv.in{transform:none}}
+
+/* faq */
+.faq{max-width:820px}
+.q{border-radius:16px;margin-bottom:12px;overflow:hidden}
+.q button{width:100%;text-align:left;background:none;border:0;color:var(--text);font-family:var(--display);font-weight:600;font-size:18px;padding:22px 24px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.q .pm{width:30px;height:30px;border-radius:9px;background:var(--grad-soft);color:var(--accent);font-family:var(--mono);font-size:20px;display:grid;place-items:center;transition:transform .3s var(--ease);flex:none}
+.q.open .pm{transform:rotate(135deg)}
+.q .a{max-height:0;overflow:hidden;transition:max-height .35s var(--ease);color:var(--muted);font-size:15.5px}
+.q .a p{padding:0 24px 24px}
+
+/* final cta */
+.cta-band{padding:50px;border-radius:30px;text-align:center;box-shadow:var(--glow);position:relative;overflow:hidden}
+.cta-band::before{content:"";position:absolute;inset:0;background:var(--grad-soft);opacity:.6;z-index:-1}
+.cta-band h2{font-size:clamp(30px,4.4vw,50px);max-width:18ch;margin:0 auto 18px;font-weight:800}
+.cta-band p{color:var(--muted);font-size:18px;max-width:54ch;margin:0 auto 30px}
+.cta-band .row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+
+/* footer */
+footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;position:relative;z-index:2}
+.foot-brand{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:50px;text-align:center}
+.foot-brand svg{width:46px;height:46px}
+.foot-brand .name{font-family:var(--display);font-weight:700;font-size:21px}
+.foot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;border-top:1px solid var(--border);padding-top:42px}
+.foot-col h4{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;font-weight:700}
+.foot-col a,.foot-col span{display:block;color:var(--text);font-size:14.5px;padding:6px 0;opacity:.82;transition:opacity .2s,color .2s}
+.foot-col a:hover{opacity:1;color:var(--accent)}
+.copyright{margin-top:46px;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+@media(max-width:760px){.foot-grid{grid-template-columns:1fr 1fr;gap:28px}}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(20px);background:var(--grad);color:#fff;padding:14px 22px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 20px 50px -18px rgba(225,29,116,.7);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:200}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* scroll reveal (3D) */
+.reveal{opacity:0;transform:translateY(46px) rotateX(12deg) scale(.98);transform-origin:center bottom;transition:opacity 1.4s var(--ease),transform 1.5s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal[data-delay="1"]{transition-delay:.2s}
+.reveal[data-delay="2"]{transition-delay:.4s}
+.reveal[data-delay="3"]{transition-delay:.6s}
+.reveal[data-delay="4"]{transition-delay:.8s}
+.reveal[data-delay="5"]{transition-delay:1s}
+/* idle float + pulse + pop-in */
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 1px var(--border),0 30px 80px -32px rgba(225,29,116,.38)}50%{box-shadow:0 0 0 1px var(--border-strong),0 40px 95px -26px rgba(139,92,246,.55)}}
+.console{animation:pulseGlow 6.5s ease-in-out infinite}
+@keyframes pop{from{opacity:0;transform:translateY(13px) scale(.95)}to{opacity:1;transform:none}}
+.scr>*{opacity:0;animation:pop .6s var(--ease) forwards}
+.scr>*:nth-child(1){animation-delay:.4s}
+.scr>*:nth-child(2){animation-delay:.8s}
+.scr>*:nth-child(3){animation-delay:1.2s}
+.scr>*:nth-child(4){animation-delay:1.6s}
+.brand svg{transition:transform .5s var(--ease)}
+.brand:hover svg{transform:perspective(320px) rotateY(32deg) scale(1.05)}
+
+/* extra-gentle entrance just for Every channel + Packages */
+.channels .rv,.tiers .rv{transition:opacity 2s cubic-bezier(.16,1,.3,1),transform 2.2s cubic-bezier(.16,1,.3,1)}
+.channels .rv[data-delay="1"],.tiers .rv[data-delay="1"]{transition-delay:.34s}
+.channels .rv[data-delay="2"],.tiers .rv[data-delay="2"]{transition-delay:.66s}
+.channels .rv[data-delay="3"]{transition-delay:.98s}
+@media (prefers-reduced-motion:reduce){.channels .rv,.tiers .rv{transition:none}}
+
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none}
+  .deck{transform:none!important}.blob{display:none}
+  .console{animation:none}.scr>*{opacity:1;animation:none}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="field" aria-hidden="true">
+  <div class="blob b1" data-parallax="0.06"></div>
+  <div class="blob b2" data-parallax="-0.04"></div>
+  <div class="blob b3" data-parallax="0.03"></div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+
+<!-- NAV -->
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a href="#top" class="brand" aria-label="Abdullah Jameel AI home">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#FF6B5B"/><stop offset=".5" stop-color="#E11D74"/><stop offset="1" stop-color="#8B5CF6"/>
+        </linearGradient></defs>
+        <g fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 52 L30 12"/><path d="M30 12 L44 44 Q45.5 54 36 54 Q28 54 28 47"/><path d="M21 33 L37 33"/>
+        </g>
+        <circle cx="49" cy="15" r="4" fill="#8B5CF6"/>
+      </svg>
+      Abdullah Jameel AI
+    </a>
+    <nav class="nav-links">
+      <a href="#demo">Live demo</a><a href="#what">What it does</a><a href="#how">How it works</a><a href="#packages">Packages</a><a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-tools">
+      <a class="icon-btn" href="https://www.instagram.com/abdullahjameelai/" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <a href="#demo" class="btn btn-primary">Book a demo</a>
+    </div>
+  </div>
+</header>
+<span id="top"></span>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow reveal">AI chat &amp; call agents</span>
+      <div class="trust reveal" data-delay="1">
+        <div class="avatars" aria-hidden="true"><span>D</span><span>M</span><span>S</span><span>V</span><span>+</span></div>
+        <small>Loved by clinics, salons and busy front desks</small>
+      </div>
+      <h1 class="reveal" data-delay="1">An AI receptionist that answers every chat and call — and books it <span class="grad-text">right into your calendar.</span></h1>
+      <p class="sub reveal" data-delay="2">We build AI chat and voice agents that sound like your sharpest receptionist — replying on your website, picking up the phone, and dropping appointments into your calendar. Set up in days, taking bookings by next week.</p>
+      <div class="hero-cta reveal" data-delay="3">
+        <a href="#demo" class="btn btn-primary">Book a demo</a>
+        <a href="#demo" class="btn btn-ghost">See it book live ↓</a>
+      </div>
+      <div class="chips reveal" data-delay="4">
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Always on</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Replies in seconds</span>
+        <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Web, phone &amp; WhatsApp</span>
+      </div>
+    </div>
+
+    <!-- 3D stage -->
+    <div class="stage reveal" data-delay="2">
+      <div class="deck" id="deck">
+        <div class="console glass">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <div class="scr">
+            <div class="msg bot">Hey! I'm your AI receptionist 👋 Looking to book a visit?</div>
+            <div class="msg me">Got anything Thursday at 4pm?</div>
+            <div class="msg bot">4:00 PM Thursday is free. Pop in your name &amp; email?</div>
+            <div class="bookrow"><span class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span> Booked · Thu 4:00 PM · synced to calendar</div>
+          </div>
+        </div>
+        <div class="sat s1" data-depth="22"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.8.6a2 2 0 0 1 1.7 2.1z"/></svg></span> Voice call answered</div>
+        <div class="sat s2" data-depth="34"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1 1 21 11.5z"/></svg></span> WhatsApp reply sent</div>
+        <div class="sat s3" data-depth="16"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7V3m8 4V3M3 11h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/></svg></span> Calendar updated</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap"><div class="marquee reveal" aria-hidden="true">
+    <div class="mtrack">
+      <span><em>Veterinary clinics</em><em>Physiotherapists</em><em>Consultancies</em><em>Salons</em><em>Med spas</em><em>Dental clinics</em><em>Law firms</em><em>Barbershops</em><em>Chiropractors</em><em>Real estate</em></span>
+      <span><em>Veterinary clinics</em><em>Physiotherapists</em><em>Consultancies</em><em>Salons</em><em>Med spas</em><em>Dental clinics</em><em>Law firms</em><em>Barbershops</em><em>Chiropractors</em><em>Real estate</em></span>
+    </div>
+  </div></div>
+</section>
+
+<!-- §01 DEMO -->
+<section class="block" id="demo">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="row"><span class="section-no">§ 01</span><h2>Live demo</h2></div>
+      <p>Chat with the agent on the left and watch the booking show up on the right. It's the exact same agent we set up for you — ask it to book, move, or cancel an appointment, and see the calendar update in real time.</p>
+    </div>
+    <div class="demo-grid">
+      <div class="panel glass reveal" id="chatPanel">
+        <div class="chat-host" id="chatHost">
+          <!-- ============================================================= -->
+          <!--  APNA CHAT YAHAN LAGAYEN                                       -->
+          <!--  Apne chatbot ka embed code / <script> / <iframe> is div ke   -->
+          <!--  andar paste karein. Jab aap apna widget add kar dein, neeche  -->
+          <!--  wali demo (chatFallback) wali div delete kar sakte hain.      -->
+          <!-- ============================================================= -->
+          <div id="myChat"></div>
+
+          <!-- Demo preview (placeholder) — apna chat add karne ke baad hata dein -->
+          <div class="chat-fallback" id="chatFallback">
+            <div class="bubble bot">Hey! I'm the booking assistant for Abdullah Jameel AI. Want to grab a quick discovery call? 👋</div>
+            <div class="bubble me">Sure — can you book me in for Thursday at 4pm?</div>
+            <div class="bubble bot">On it — just drop your name and email and I'll lock it in. ✨</div>
+            <div class="chat-input"><input type="text" placeholder="Type a message…" aria-label="Chat message" /><button class="btn btn-primary" type="button">Send</button></div>
+          </div>
+        </div>
+        <div class="panel-foot"><span class="dot"></span> Live AI chat · wired to your calendar</div>
+      </div>
+      <div class="panel glass reveal" data-delay="1">
+        <div class="cal-host" id="calHost"></div>
+        <div class="panel-foot"><span class="dot"></span> Live calendar · every booking shows up here</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §02 WHAT IT DOES -->
+<section class="block" id="what">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="row"><span class="section-no">§ 02</span><h2>What it does</h2></div>
+      <p>One agent running your whole front desk — the conversations, the bookings, and everything in between.</p>
+    </div>
+    <div class="cards">
+      <div class="card glass rv rv-left" data-tilt><span class="tag">A.01</span><h3>Books while chatting</h3><p>Carries a customer from "got anything Friday?" to a locked-in slot — no forms, no back-and-forth.</p></div>
+      <div class="card glass rv rv-up" data-delay="1" data-tilt><span class="tag">A.02</span><h3>Reschedules &amp; cancels</h3><p>Shifts and cancels appointments on its own, and updates your calendar the moment it does.</p></div>
+      <div class="card glass rv rv-right" data-delay="2" data-tilt><span class="tag">A.03</span><h3>Always awake</h3><p>No closing time, no missed messages, no "we'll get back to you." It's right there at 2am too.</p></div>
+      <div class="card glass rv rv-left" data-tilt><span class="tag">A.04</span><h3>Knows when to tag you in</h3><p>Passes the tricky conversations to a real person — with the full backstory, so nobody repeats themselves.</p></div>
+      <div class="card glass rv rv-up" data-delay="1" data-tilt><span class="tag">A.05</span><h3>Speaks their language</h3><p>Replies fluently in whatever language your customer messages in — Urdu, English and 30+ more.</p></div>
+      <div class="card glass rv rv-right" data-delay="2" data-tilt><span class="tag">A.06</span><h3>Sounds like you</h3><p>Trained on your services, your rules and your tone — not some off-the-shelf bot.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- §03 HOW IT WORKS -->
+<section class="block" id="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="row"><span class="section-no">§ 03</span><h2>How it works</h2></div>
+      <p>Four steps from our first chat to an agent that's booking customers for you.</p>
+    </div>
+    <div class="steps">
+      <div class="step glass rv rv-left" data-tilt><div class="n">1</div><h3>Tell us about your business</h3><p>A quick 10-minute call so we get your services, your hours and how you like to book.</p></div>
+      <div class="step glass rv rv-up" data-delay="1" data-tilt><div class="n">2</div><h3>We train your agent</h3><p>We teach it your calendar, services and tone until it genuinely sounds like your team.</p></div>
+      <div class="step glass rv rv-up" data-delay="2" data-tilt><div class="n">3</div><h3>It goes live</h3><p>On your website, phone, WhatsApp and Instagram — wherever customers come knocking.</p></div>
+      <div class="step glass rv rv-right" data-delay="3" data-tilt><div class="n">4</div><h3>Bookings roll in</h3><p>Confirmed appointments land in your Google Calendar the instant they're made.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- §04 CHANNELS -->
+<section class="block" id="channels">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="row"><span class="section-no">§ 04</span><h2>Every channel</h2></div>
+      <p>The same agent, waiting wherever your customers already hang out.</p>
+    </div>
+    <div class="channels">
+      <div class="channel glass rv rv-left" data-tilt><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>Website chat</h3><p>A quick, on-brand widget that says hello and books visitors before they drift off.</p></div>
+      <div class="channel glass rv rv-up" data-delay="1" data-tilt><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.5 2.8.6a2 2 0 0 1 1.7 2.1z"/></svg></div><h3>Voice (phone calls)</h3><p>Answers the phone, handles questions and books appointments in a natural-sounding voice.</p></div>
+      <div class="channel glass rv rv-up" data-delay="2" data-tilt><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.5L3 21l2-5.7A8.4 8.4 0 1 1 21 11.5z"/></svg></div><h3>WhatsApp</h3><p>Meets customers on the app they're already messaging on all day long.</p></div>
+      <div class="channel glass rv rv-right" data-delay="3" data-tilt><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></div><h3>Instagram / DMs</h3><p>Turns DMs and story replies into booked appointments while you sleep.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- §05 PACKAGES -->
+<section class="block" id="packages">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="row"><span class="section-no">§ 05</span><h2>Packages</h2></div>
+      <p>No two businesses are the same, so we work out the right setup — and the pricing — together. Tell us what you do and we'll show you your own agent, live, within days.</p>
+    </div>
+    <div class="tiers">
+      <div class="tier glass rv rv-left">
+        <h3>Starter</h3><div class="price"><span>Pricing we’ll sort on a call</span></div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Website chat agent</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Booking &amp; rescheduling on your calendar</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Trained on your services</li>
+        </ul><a href="#demo" class="btn btn-ghost">Book a demo</a>
+      </div>
+      <div class="tier glass featured rv rv-up" data-delay="1">
+        <h3>Growth</h3><div class="price"><span>Pricing we’ll sort on a call</span></div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Everything in Starter</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Voice, WhatsApp &amp; Instagram</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Routing across your team</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Lead qualification</li>
+        </ul><a href="#demo" class="btn btn-primary">Book a demo</a>
+      </div>
+      <div class="tier glass rv rv-right" data-delay="2">
+        <h3>Custom</h3><div class="price"><span>Pricing we’ll sort on a call</span></div>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Everything in Growth</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Custom integrations &amp; CRM</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg> Dedicated support</li>
+        </ul><a href="#demo" class="btn btn-ghost">Book a demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- §06 FAQ -->
+<section class="block" id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal"><div class="row"><span class="section-no">§ 06</span><h2>FAQ</h2></div></div>
+    <div class="faq">
+      <div class="q glass reveal"><button type="button"><span>Do you integrate with my calendar?</span><span class="pm">+</span></button><div class="a"><p>Yep. It writes confirmed bookings into your Google Calendar in real time, and checks your availability first so it never double-books.</p></div></div>
+      <div class="q glass reveal"><button type="button"><span>What if I have multiple staff members?</span><span class="pm">+</span></button><div class="a"><p>Easily handled. It routes bookings and chats to the right person, respecting each one's services and availability.</p></div></div>
+      <div class="q glass reveal"><button type="button"><span>How long does setup take?</span><span class="pm">+</span></button><div class="a"><p>Usually a few days. After a short discovery call we train it on your calendar, services and tone, then flip it live.</p></div></div>
+      <div class="q glass reveal"><button type="button"><span>What languages does it speak?</span><span class="pm">+</span></button><div class="a"><p>Over 30. It answers in whatever language the customer opens with — Urdu, English and more — and switches mid-chat without missing a beat.</p></div></div>
+      <div class="q glass reveal"><button type="button"><span>Can it handle cancellations?</span><span class="pm">+</span></button><div class="a"><p>For sure. It cancels and reschedules on request and updates your calendar instantly — no human needed.</p></div></div>
+      <div class="q glass reveal"><button type="button"><span>What about privacy?</span><span class="pm">+</span></button><div class="a"><p>The public calendar shows free/busy only. Names, notes and event details stay completely hidden from visitors.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="block">
+  <div class="wrap">
+    <div class="cta-band glass reveal">
+      <h2>Stop letting customers slip away. Start booking them.</h2>
+      <p>Tell us what you do and we'll show you your own agent — live, within days.</p>
+      <div class="row">
+        <a href="#demo" class="btn btn-primary">Book a demo</a>
+        <button type="button" class="btn btn-ghost" id="copyEmail" data-email="connect@abdullahjameelai.com">connect@abdullahjameelai.com</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-brand">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <g fill="none" stroke="url(#g)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 52 L30 12"/><path d="M30 12 L44 44 Q45.5 54 36 54 Q28 54 28 47"/><path d="M21 33 L37 33"/>
+        </g><circle cx="49" cy="15" r="4" fill="#8B5CF6"/>
+      </svg>
+      <span class="name">Abdullah Jameel AI</span>
+    </div>
+    <div class="foot-grid">
+      <div class="foot-col"><h4>Product</h4><a href="#what">What it does</a><a href="#how">How it works</a><a href="#channels">Every channel</a><a href="#packages">Packages</a></div>
+      <div class="foot-col"><h4>Company</h4><a href="#demo">Live demo</a><a href="#faq">FAQ</a><a href="#demo">Book a demo</a></div>
+      <div class="foot-col"><h4>Get in touch</h4><a href="#" class="footCopyEmail" data-email="connect@abdullahjameelai.com">connect@abdullahjameelai.com</a><a href="https://www.instagram.com/abdullahjameelai/" target="_blank" rel="noopener">Instagram</a></div>
+      <div class="foot-col"><h4>Rights</h4><span>© <span class="year"></span> Abdullah Jameel AI</span><span>abdullahjameelai.com</span></div>
+    </div>
+    <div class="copyright"><span>© <span class="year"></span> Abdullah Jameel AI. All rights reserved.</span><span>Booking your customers while you sleep.</span></div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var root=document.documentElement;
+  var reduce=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+  /* THEME (dark default, persisted) */
+  var saved=null; try{saved=localStorage.getItem("ajai-theme");}catch(e){}
+  if(saved==="dark"||saved==="light") root.setAttribute("data-theme",saved);
+  function setTheme(m){root.setAttribute("data-theme",m);try{localStorage.setItem("ajai-theme",m);}catch(e){}mountCalendar(m);}
+  document.getElementById("themeToggle").addEventListener("click",function(){
+    setTheme(root.getAttribute("data-theme")==="dark"?"light":"dark");
+  });
+
+  /* SMOOTH ANCHOR SCROLL */
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    a.addEventListener("click",function(e){
+      var id=a.getAttribute("href"); if(id==="#"||id.length<2) return;
+      var el=document.querySelector(id); if(!el) return;
+      e.preventDefault();
+      el.scrollIntoView({behavior:reduce?"auto":"smooth",block:"start"});
+      history.replaceState(null,"",id);
+    });
+  });
+
+  /* BOOK A DEMO -> jump straight to the live AI chat + highlight it */
+  function goToChat(){
+    var panel=document.getElementById("chatPanel");
+    var host=document.getElementById("chatHost");
+    if(panel){panel.classList.remove("flash");void panel.offsetWidth;panel.classList.add("flash");}
+    if(host){var f=host.querySelector("input,textarea,button,[contenteditable]");if(f){try{f.focus({preventScroll:true});}catch(e){}}}
+  }
+  document.querySelectorAll('a[href="#demo"]').forEach(function(a){
+    a.addEventListener("click",function(){ setTimeout(goToChat, reduce?60:680); });
+  });
+
+  /* EMAIL COPY + TOAST */
+  var toast=document.getElementById("toast"),tt;
+  function showToast(m){toast.textContent=m;toast.classList.add("show");clearTimeout(tt);tt=setTimeout(function(){toast.classList.remove("show");},2600);}
+  function copyEmail(em){
+    var done=function(){showToast("Copied "+em+" — paste it into your email app");};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(em).then(done).catch(function(){legacy(em);done();});}
+    else{legacy(em);done();}
+  }
+  function legacy(t){var x=document.createElement("textarea");x.value=t;x.style.position="fixed";x.style.opacity="0";document.body.appendChild(x);x.select();try{document.execCommand("copy");}catch(e){}document.body.removeChild(x);}
+  document.querySelectorAll('#copyEmail,.footCopyEmail').forEach(function(b){b.addEventListener("click",function(e){e.preventDefault();copyEmail(b.getAttribute("data-email"));});});
+
+  /* FAQ */
+  document.querySelectorAll(".q button").forEach(function(btn){
+    btn.addEventListener("click",function(){var q=btn.parentElement,a=q.querySelector(".a");var open=q.classList.toggle("open");a.style.maxHeight=open?a.scrollHeight+"px":null;});
+  });
+
+  /* DEMO CHAT (placeholder) — keeps the Send button working until a real chat is added */
+  (function(){
+    var fb=document.getElementById("chatFallback"); if(!fb) return;
+    var row=fb.querySelector(".chat-input"); if(!row) return;
+    var input=row.querySelector("input"), send=row.querySelector("button");
+    var replies=["Love it — what day works best for you? 😊","Got it. Drop your name and email and I'll lock it in.","Perfect, I'll get that booked. Anything else I can help with?"];
+    var i=0;
+    function add(text,cls){var b=document.createElement("div");b.className="bubble "+cls;b.textContent=text;fb.insertBefore(b,row);fb.scrollTop=fb.scrollHeight;}
+    function submit(){var v=(input&&input.value||"").trim();if(!v)return;add(v,"me");input.value="";setTimeout(function(){add(replies[i%replies.length],"bot");i++;},650);}
+    if(send)send.addEventListener("click",submit);
+    if(input)input.addEventListener("keydown",function(e){if(e.key==="Enter")submit();});
+  })();
+
+  /* SCROLL REVEAL */
+  if(reduce){document.querySelectorAll(".reveal").forEach(function(el){el.classList.add("in");});}
+  else if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.12,rootMargin:"0px 0px -50px 0px"});
+    document.querySelectorAll(".reveal").forEach(function(el){io.observe(el);});
+  } else {document.querySelectorAll(".reveal").forEach(function(el){el.classList.add("in");});}
+
+  /* DIRECTIONAL 3D REVEAL — re-runs every time on scroll up/down */
+  if(reduce){document.querySelectorAll(".rv").forEach(function(el){el.classList.add("in");});}
+  else if("IntersectionObserver" in window){
+    var ioD=new IntersectionObserver(function(en){en.forEach(function(e){e.target.classList.toggle("in",e.isIntersecting);});},{threshold:.25,rootMargin:"0px 0px -40px 0px"});
+    document.querySelectorAll(".rv").forEach(function(el){ioD.observe(el);});
+  } else {document.querySelectorAll(".rv").forEach(function(el){el.classList.add("in");});}
+
+  /* PARALLAX + PROGRESS (rAF) */
+  var bar=document.getElementById("progress"),sy=0,ticking=false;
+  var pEls=[].slice.call(document.querySelectorAll("[data-parallax]"));
+  function upd(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    bar.style.transform="scaleX("+(h>0?Math.min(sy/h,1):0)+")";
+    if(!reduce){pEls.forEach(function(el){var sp=parseFloat(el.getAttribute("data-parallax"));el.style.transform="translate3d(0,"+(sy*sp)+"px,0)";});}
+    ticking=false;
+  }
+  window.addEventListener("scroll",function(){sy=window.scrollY||window.pageYOffset;if(!ticking){requestAnimationFrame(upd);ticking=true;}},{passive:true});
+  upd();
+
+  /* HERO 3D — idle float + smooth mouse follow + scroll tilt (one rAF loop) */
+  var deck=document.getElementById("deck");
+  var sats=[].slice.call(document.querySelectorAll(".sat"));
+  var hero=document.querySelector(".hero");
+  if(!reduce&&deck&&hero){
+    deck.style.transition="none";
+    var mx=0,my=0,cmx=0,cmy=0;
+    hero.addEventListener("pointermove",function(e){mx=e.clientX/window.innerWidth-.5;my=e.clientY/window.innerHeight-.5;});
+    hero.addEventListener("pointerleave",function(){mx=0;my=0;});
+    sats.forEach(function(s,i){s._ph=i*1.9;s._z=s.classList.contains("s2")?120:s.classList.contains("s1")?80:60;});
+    function loop(now){
+      var t=now/1000;
+      cmx+=(mx-cmx)*.07; cmy+=(my-cmy)*.07;
+      var hh=hero.offsetHeight||1, top=hero.getBoundingClientRect().top;
+      var sf=Math.min(Math.max(-top/hh,0),1);
+      var fy=Math.sin(t*.9)*7-sf*46, fz=Math.cos(t*.7)*12;
+      deck.style.transform="translateY("+fy+"px) rotateY("+(-16+cmx*12-sf*6)+"deg) rotateX("+(9-cmy*9+sf*4)+"deg) translateZ("+fz+"px)";
+      sats.forEach(function(s){
+        var fly=Math.sin(t*1.1+s._ph)*9, flx=Math.cos(t*.8+s._ph)*5;
+        s.style.transform="translate3d("+(cmx*-s._z*.18+flx)+"px,"+(cmy*-s._z*.18+fly)+"px,"+s._z+"px)";
+      });
+      requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+  }
+  if(!reduce){
+    /* TILT on cards */
+    document.querySelectorAll("[data-tilt]").forEach(function(c){
+      c.addEventListener("pointermove",function(e){
+        var r=c.getBoundingClientRect();var px=(e.clientX-r.left)/r.width-.5;var py=(e.clientY-r.top)/r.height-.5;
+        c.style.transform="perspective(820px) rotateY("+(px*9)+"deg) rotateX("+(-py*9)+"deg) translateZ(6px)";
+      });
+      c.addEventListener("pointerleave",function(){c.style.transform="";});
+    });
+  }
+
+  /* GOOGLE CALENDAR (theme-aware) */
+  // TODO: replace with YOUR public Google Calendar address (free/busy share)
+  var CAL_SRC="abdullah.jamil.1929%40gmail.com";
+  function mountCalendar(mode){
+    var host=document.getElementById("calHost"); if(!host) return;
+    var accent=(mode==="dark")?"%23FF6B5B":"%23E11D74";
+    var url="https://calendar.google.com/calendar/embed?src="+CAL_SRC+"&ctz=Asia%2FKarachi&wkst=2&mode=MONTH&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&color="+accent;
+    host.innerHTML='<iframe title="Live availability calendar" src="'+url+'" loading="lazy"></iframe>';
+  }
+
+  /* INIT */
+  var yr=new Date().getFullYear();document.querySelectorAll(".year").forEach(function(s){s.textContent=yr;});
+  mountCalendar(root.getAttribute("data-theme"));
+})();
+</script>
+</body>
+</html>
