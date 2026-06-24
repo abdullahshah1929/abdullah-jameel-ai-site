@@ -6,6 +6,10 @@
 <title>Abdullah Jameel AI — AI receptionist that answers every chat & call</title>
 <meta name="description" content="Abdullah Jameel AI builds AI chatbots and voice agents that answer customers, pick up the phone, and book appointments straight into your calendar — live in days." />
 
+<!-- OpenAi Chatkit powered by Second Brain OS -->
+<script src="https://cdn.platform.openai.com/deployments/chatkit/chatkit.js" async></script>
+<!-- OpenAi Chatkit powered by Second Brain OS -->
+
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23FF6B5B' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 52 L30 12'/%3E%3Cpath d='M30 12 L44 44 Q45.5 54 36 54 Q28 54 28 47'/%3E%3Cpath d='M21 33 L37 33'/%3E%3C/g%3E%3Ccircle cx='49' cy='15' r='4' fill='%23E11D74'/%3E%3C/svg%3E" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -409,21 +413,62 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
     <div class="demo-grid">
       <div class="panel glass reveal" id="chatPanel">
         <div class="chat-host" id="chatHost">
-          <!-- ============================================================= -->
-          <!--  APNA CHAT YAHAN LAGAYEN                                       -->
-          <!--  Apne chatbot ka embed code / <script> / <iframe> is div ke   -->
-          <!--  andar paste karein. Jab aap apna widget add kar dein, neeche  -->
-          <!--  wali demo (chatFallback) wali div delete kar sakte hain.      -->
-          <!-- ============================================================= -->
-          <div id="myChat"></div>
+          <!-- OpenAi Chatkit powered by Second Brain OS -->
+          <openai-chatkit
+            style="width: 100%; height: 600px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);"
+          ></openai-chatkit>
 
-          <!-- Demo preview (placeholder) — apna chat add karne ke baad hata dein -->
-          <div class="chat-fallback" id="chatFallback">
-            <div class="bubble bot">Hey! I'm the booking assistant for Abdullah Jameel AI. Want to grab a quick discovery call? 👋</div>
-            <div class="bubble me">Sure — can you book me in for Thursday at 4pm?</div>
-            <div class="bubble bot">On it — just drop your name and email and I'll lock it in. ✨</div>
-            <div class="chat-input"><input type="text" placeholder="Type a message…" aria-label="Chat message" /><button class="btn btn-primary" type="button">Send</button></div>
-          </div>
+          <script>
+            const DOMAIN_KEY = 'domain_pk_6a3bc0ee944c8193a57952bd593d7c2f09d69513507614ec';
+            const API_URL = 'https://openai.secondbrainos.com/chatkit';
+
+            const customFetch = (url, options = {}) => {
+              return fetch(url, {
+                ...options,
+                headers: {
+                  ...options.headers,
+                  'X-Domain-Key': DOMAIN_KEY,
+                },
+              });
+            };
+
+            function initChatKit() {
+              const kit = document.querySelector('openai-chatkit');
+              if (kit && kit.setOptions) {
+                kit.setOptions({
+                  api: {
+                    url: API_URL,
+                    domainKey: DOMAIN_KEY,
+                    fetch: customFetch,
+                  },
+                  theme: {
+                    colorScheme: 'light',
+                    color: {
+                      accent: { primary: '#4F46E5', level: 2 },
+                    },
+                    radius: 'round',
+                    density: 'spacious',
+                  },
+                  startScreen: {
+                    greeting: 'Hi! I can help you book, reschedule, or cancel appointments. What would you like to do?',
+                    prompts: [
+                      { label: 'Book an appointment', prompt: 'I want to book an appointment', icon: 'calendar' },
+                      { label: 'Check availability', prompt: 'What times are available?', icon: 'clock' },
+                      { label: 'Reschedule', prompt: 'I need to reschedule my appointment', icon: 'reload' }
+                    ]
+                  },
+                  composer: {
+                    placeholder: 'Ask me about scheduling...'
+                  }
+                });
+              } else {
+                setTimeout(initChatKit, 50);
+              }
+            }
+
+            initChatKit();
+          </script>
+          <!-- /OpenAi Chatkit powered by Second Brain OS -->
         </div>
         <div class="panel-foot"><span class="dot"></span> Live AI chat · wired to your calendar</div>
       </div>
@@ -626,18 +671,9 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
     btn.addEventListener("click",function(){var q=btn.parentElement,a=q.querySelector(".a");var open=q.classList.toggle("open");a.style.maxHeight=open?a.scrollHeight+"px":null;});
   });
 
-  /* DEMO CHAT (placeholder) — keeps the Send button working until a real chat is added */
-  (function(){
-    var fb=document.getElementById("chatFallback"); if(!fb) return;
-    var row=fb.querySelector(".chat-input"); if(!row) return;
-    var input=row.querySelector("input"), send=row.querySelector("button");
-    var replies=["Love it — what day works best for you? 😊","Got it. Drop your name and email and I'll lock it in.","Perfect, I'll get that booked. Anything else I can help with?"];
-    var i=0;
-    function add(text,cls){var b=document.createElement("div");b.className="bubble "+cls;b.textContent=text;fb.insertBefore(b,row);fb.scrollTop=fb.scrollHeight;}
-    function submit(){var v=(input&&input.value||"").trim();if(!v)return;add(v,"me");input.value="";setTimeout(function(){add(replies[i%replies.length],"bot");i++;},650);}
-    if(send)send.addEventListener("click",submit);
-    if(input)input.addEventListener("keydown",function(e){if(e.key==="Enter")submit();});
-  })();
+  /* OpenAi ChatKit (powered by Second Brain OS) ka config upar chat-host
+     wale section mein laga hua hai — yahan kuch karne ki zaroorat nahi. */
+
 
   /* SCROLL REVEAL */
   if(reduce){document.querySelectorAll(".reveal").forEach(function(el){el.classList.add("in");});}
