@@ -107,10 +107,14 @@ header.nav{position:sticky;top:0;z-index:100;backdrop-filter:blur(18px) saturate
   .nav-tools .btn-primary{padding:10px 16px;font-size:14px;white-space:nowrap;border-radius:12px}
   .stage{padding-top:40px}
   .deck{transform:rotateY(-4deg) rotateX(3deg);width:100%;max-width:none}
-  .sat.s2{left:0}
-  .sat.s3{right:0}
-  .sat{font-size:11.5px;padding:10px 12px}
-  .sat .ic{width:26px;height:26px}
+  .sat{font-size:11px;padding:9px 11px;gap:7px;border-radius:13px;max-width:calc(50% - 12px)}
+  .sat .ic{width:24px;height:24px;border-radius:7px}
+  .sat .ic svg{width:14px;height:14px}
+  /* WhatsApp + Calendar share the SAME bottom line, fully inside the screen, */
+  /* and sit BELOW the console so the "Booked..." message is never covered.   */
+  .sat.s1{top:-16px;right:8px;left:auto;bottom:auto;max-width:none;transform:none}
+  .sat.s2{left:8px;right:auto;top:auto;bottom:-44px;transform:none}
+  .sat.s3{right:8px;left:auto;top:auto;bottom:-16px;transform:none}
 }
 
 /* HERO */
@@ -414,6 +418,10 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
       <div class="panel glass reveal" id="chatPanel">
         <div class="chat-host" id="chatHost">
           <!-- OpenAi Chatkit powered by Second Brain OS -->
+          <openai-chatkit
+            style="width: 100%; height: 600px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1);"
+          ></openai-chatkit>
+
           <script>
             const DOMAIN_KEY = 'domain_pk_6a3bc0ee944c8193a57952bd593d7c2f09d69513507614ec';
             const API_URL = 'https://openai.secondbrainos.com/chatkit';
@@ -428,63 +436,41 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
               });
             };
 
-            // Site ke current theme (dark/light) ke mutabiq ChatKit ka color scheme
-            function ajaiTheme() {
-              return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-            }
-            function buildChatKitOptions() {
-              var mode = ajaiTheme();
-              return {
-                api: { url: API_URL, domainKey: DOMAIN_KEY, fetch: customFetch },
-                theme: {
-                  colorScheme: mode,
-                  color: { accent: { primary: mode === 'light' ? '#E11D74' : '#FF6B5B', level: 2 } },
-                  radius: 'round',
-                  density: 'spacious',
-                },
-                startScreen: {
-                  greeting: 'Hi! I can help you book, reschedule, or cancel appointments. What would you like to do?',
-                  prompts: [
-                    { label: 'Book an appointment', prompt: 'I want to book an appointment', icon: 'calendar' },
-                    { label: 'Check availability', prompt: 'What times are available?', icon: 'clock' },
-                    { label: 'Reschedule', prompt: 'I need to reschedule my appointment', icon: 'reload' }
-                  ]
-                },
-                composer: { placeholder: 'Ask me about scheduling...' }
-              };
-            }
-
-            var chatHostEl = document.getElementById('chatHost');
-            var currentMode = null;
-
-            // CDN load hone tak retry karke options set karta hai
-            function applyOptions(el, tries) {
-              tries = tries || 0;
-              if (el.setOptions) { el.setOptions(buildChatKitOptions()); }
-              else if (tries < 120) { setTimeout(function () { applyOptions(el, tries + 1); }, 50); }
+            function initChatKit() {
+              const kit = document.querySelector('openai-chatkit');
+              if (kit && kit.setOptions) {
+                kit.setOptions({
+                  api: {
+                    url: API_URL,
+                    domainKey: DOMAIN_KEY,
+                    fetch: customFetch,
+                  },
+                  theme: {
+                    colorScheme: 'light',
+                    color: {
+                      accent: { primary: '#4F46E5', level: 2 },
+                    },
+                    radius: 'round',
+                    density: 'spacious',
+                  },
+                  startScreen: {
+                    greeting: 'Hi! I can help you book, reschedule, or cancel appointments. What would you like to do?',
+                    prompts: [
+                      { label: 'Book an appointment', prompt: 'I want to book an appointment', icon: 'calendar' },
+                      { label: 'Check availability', prompt: 'What times are available?', icon: 'clock' },
+                      { label: 'Reschedule', prompt: 'I need to reschedule my appointment', icon: 'reload' }
+                    ]
+                  },
+                  composer: {
+                    placeholder: 'Ask me about scheduling...'
+                  }
+                });
+              } else {
+                setTimeout(initChatKit, 50);
+              }
             }
 
-            // ChatKit ko mojooda theme ke sath fresh mount karta hai.
-            // (Already-mounted instance par setOptions se colorScheme reliably nahi badalta,
-            //  is liye element ko dobara banate hain — naya mount sahi theme leta hai.)
-            function mountChatKit() {
-              if (!chatHostEl) return;
-              currentMode = ajaiTheme();
-              var old = chatHostEl.querySelector('openai-chatkit');
-              if (old) old.remove();
-              var el = document.createElement('openai-chatkit');
-              el.style.cssText = 'width:100%;height:600px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.1);';
-              chatHostEl.appendChild(el);
-              applyOptions(el, 0);
-            }
-
-            // Theme toggle hone par (neeche wale script se) call hota hai.
-            // Sirf tab re-mount karta hai jab theme waqai badla ho.
-            window.applyChatKitTheme = function () {
-              if (ajaiTheme() !== currentMode) mountChatKit();
-            };
-
-            mountChatKit();
+            initChatKit();
           </script>
           <!-- /OpenAi Chatkit powered by Second Brain OS -->
         </div>
@@ -646,7 +632,7 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
   /* THEME (dark default, persisted) */
   var saved=null; try{saved=localStorage.getItem("ajai-theme");}catch(e){}
   if(saved==="dark"||saved==="light") root.setAttribute("data-theme",saved);
-  function setTheme(m){root.setAttribute("data-theme",m);try{localStorage.setItem("ajai-theme",m);}catch(e){}mountCalendar(m);if(window.applyChatKitTheme)window.applyChatKitTheme();}
+  function setTheme(m){root.setAttribute("data-theme",m);try{localStorage.setItem("ajai-theme",m);}catch(e){}mountCalendar(m);}
   document.getElementById("themeToggle").addEventListener("click",function(){
     setTheme(root.getAttribute("data-theme")==="dark"?"light":"dark");
   });
@@ -735,10 +721,13 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
       var hh=hero.offsetHeight||1, top=hero.getBoundingClientRect().top;
       var sf=Math.min(Math.max(-top/hh,0),1);
       var fy=Math.sin(t*.9)*7-sf*46, fz=Math.cos(t*.7)*12;
-      deck.style.transform="translateY("+fy+"px) rotateY("+(-16+cmx*12-sf*6)+"deg) rotateX("+(9-cmy*9+sf*4)+"deg) translateZ("+fz+"px)";
+      /* on phones: soften the tilt and flatten the badges so they can't slide off-screen */
+      var small=window.innerWidth<=600, rk=small?0.32:1, zk=small?0:1;
+      deck.style.transform="translateY("+fy+"px) rotateY("+((-16+cmx*12-sf*6)*rk)+"deg) rotateX("+((9-cmy*9+sf*4)*rk)+"deg) translateZ("+fz+"px)";
       sats.forEach(function(s){
-        var fly=Math.sin(t*1.1+s._ph)*9, flx=Math.cos(t*.8+s._ph)*5;
-        s.style.transform="translate3d("+(cmx*-s._z*.18+flx)+"px,"+(cmy*-s._z*.18+fly)+"px,"+s._z+"px)";
+        var z=s._z*zk;
+        var fly=Math.sin(t*1.1+s._ph)*9, flx=Math.cos(t*.8+s._ph)*(small?3:5);
+        s.style.transform="translate3d("+(cmx*-z*.18+flx)+"px,"+(cmy*-z*.18+fly)+"px,"+z+"px)";
       });
       requestAnimationFrame(loop);
     }
@@ -768,7 +757,6 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
   /* INIT */
   var yr=new Date().getFullYear();document.querySelectorAll(".year").forEach(function(s){s.textContent=yr;});
   mountCalendar(root.getAttribute("data-theme"));
-  if(window.applyChatKitTheme)window.applyChatKitTheme();
 })();
 </script>
 </body>
