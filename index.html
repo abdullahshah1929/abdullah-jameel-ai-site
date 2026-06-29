@@ -199,6 +199,11 @@ section.block{padding:96px 0;position:relative}
 html[data-theme="dark"] .cal-host iframe{filter:invert(.92) hue-rotate(180deg) contrast(.9)}
 @media(max-width:880px){.demo-grid{grid-template-columns:1fr}.panel{min-height:500px}}
 
+/* VOICE DEMO VIDEO */
+.video-wrap{border-radius:22px;overflow:hidden;box-shadow:var(--glow);max-width:980px;margin:0 auto;display:flex;flex-direction:column}
+.video-frame{position:relative;width:100%;aspect-ratio:16/9;background:var(--bg2)}
+.video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+
 /* feature cards (tilt) */
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;perspective:1300px}
 .card{border-radius:20px;padding:28px;transition:transform .25s var(--ease),box-shadow .25s,border-color .25s;transform-style:preserve-3d;will-change:transform}
@@ -343,7 +348,7 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
       Abdullah Jameel AI
     </a>
     <nav class="nav-links">
-      <a href="#demo">Live demo</a><a href="#what">What it does</a><a href="#how">How it works</a><a href="#packages">Packages</a><a href="#faq">FAQ</a>
+      <a href="#demo">Live demo</a><a href="#voice-demo">Voice demo</a><a href="#what">What it does</a><a href="#how">How it works</a><a href="#packages">Packages</a><a href="#faq">FAQ</a>
     </nav>
     <div class="nav-tools">
       <a class="icon-btn" href="https://www.instagram.com/abdullahjameel.ai/" target="_blank" rel="noopener" aria-label="Instagram">
@@ -505,11 +510,34 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
   </div>
 </section>
 
-<!-- §02 WHAT IT DOES -->
+<!-- §02 VOICE DEMO -->
+<section class="block" id="voice-demo">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="row"><span class="section-no">§ 02</span><h2>Hear the voice agent in action</h2></div>
+      <p>Watch a real call from start to finish — the AI picks up the phone, answers questions in a natural voice, and books the appointment without anyone lifting a finger.</p>
+    </div>
+    <div class="video-wrap glass reveal" data-delay="1">
+      <div class="video-frame">
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/HUuN5y-IJsY?rel=0"
+          title="AI Voice Agent demo — Abdullah Jameel AI"
+          loading="lazy"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen></iframe>
+      </div>
+      <div class="panel-foot"><span class="dot"></span> Live AI voice agent · real call demo</div>
+    </div>
+  </div>
+</section>
+
+<!-- §03 WHAT IT DOES -->
 <section class="block" id="what">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="row"><span class="section-no">§ 02</span><h2>What it does</h2></div>
+      <div class="row"><span class="section-no">§ 03</span><h2>What it does</h2></div>
       <p>One agent running your whole front desk — the conversations, the bookings, and everything in between.</p>
     </div>
     <div class="cards">
@@ -523,11 +551,11 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
   </div>
 </section>
 
-<!-- §03 HOW IT WORKS -->
+<!-- §04 HOW IT WORKS -->
 <section class="block" id="how">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="row"><span class="section-no">§ 03</span><h2>How it works</h2></div>
+      <div class="row"><span class="section-no">§ 04</span><h2>How it works</h2></div>
       <p>Four steps from our first chat to an agent that's booking customers for you.</p>
     </div>
     <div class="steps">
@@ -539,11 +567,11 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
   </div>
 </section>
 
-<!-- §04 CHANNELS -->
+<!-- §05 CHANNELS -->
 <section class="block" id="channels">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="row"><span class="section-no">§ 04</span><h2>Every channel</h2></div>
+      <div class="row"><span class="section-no">§ 05</span><h2>Every channel</h2></div>
       <p>The same agent, waiting wherever your customers already hang out.</p>
     </div>
     <div class="channels">
@@ -555,11 +583,11 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
   </div>
 </section>
 
-<!-- §05 PACKAGES -->
+<!-- §06 PACKAGES -->
 <section class="block" id="packages">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="row"><span class="section-no">§ 05</span><h2>Packages</h2></div>
+      <div class="row"><span class="section-no">§ 06</span><h2>Packages</h2></div>
       <p>No two businesses are the same, so we work out the right setup — and the pricing — together. Tell us what you do and we'll show you your own agent, live, within days.</p>
     </div>
     <div class="tiers">
@@ -592,10 +620,10 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
   </div>
 </section>
 
-<!-- §06 FAQ -->
+<!-- §07 FAQ -->
 <section class="block" id="faq">
   <div class="wrap">
-    <div class="sec-head reveal"><div class="row"><span class="section-no">§ 06</span><h2>FAQ</h2></div></div>
+    <div class="sec-head reveal"><div class="row"><span class="section-no">§ 07</span><h2>FAQ</h2></div></div>
     <div class="faq">
       <div class="q glass reveal"><button type="button"><span>Do you integrate with my calendar?</span><span class="pm">+</span></button><div class="a"><p>Yep. It writes confirmed bookings into your Google Calendar in real time, and checks your availability first so it never double-books.</p></div></div>
       <div class="q glass reveal"><button type="button"><span>What if I have multiple staff members?</span><span class="pm">+</span></button><div class="a"><p>Easily handled. It routes bookings and chats to the right person, respecting each one's services and availability.</p></div></div>
@@ -634,7 +662,7 @@ footer{padding:70px 0 44px;border-top:1px solid var(--border);margin-top:96px;po
     </div>
     <div class="foot-grid">
       <div class="foot-col"><h4>Product</h4><a href="#what">What it does</a><a href="#how">How it works</a><a href="#channels">Every channel</a><a href="#packages">Packages</a></div>
-      <div class="foot-col"><h4>Company</h4><a href="#demo">Live demo</a><a href="#faq">FAQ</a><a href="#demo">Book a demo</a></div>
+      <div class="foot-col"><h4>Company</h4><a href="#demo">Live demo</a><a href="#voice-demo">Voice demo</a><a href="#faq">FAQ</a><a href="#demo">Book a demo</a></div>
       <div class="foot-col"><h4>Get in touch</h4><a href="#" class="footCopyEmail" data-email="support@abdullahjameelai.com">support@abdullahjameelai.com</a><a href="https://www.instagram.com/abdullahjameel.ai/" target="_blank" rel="noopener">Instagram</a></div>
       <div class="foot-col"><h4>Rights</h4><span>© <span class="year"></span> Abdullah Jameel AI</span><span>abdullahjameelai.com</span></div>
     </div>
